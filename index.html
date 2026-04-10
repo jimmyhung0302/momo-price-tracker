@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.E.M.I.N.I. Nexus Core</title>
+    <title>AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -122,7 +122,7 @@
             font-size: 1.5rem;
             margin-right: 15px;
             background: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
-            -webkit-background-clip: text;
+            
             -webkit-text-fill-color: transparent;
             animation: pulse 2s infinite;
         }
@@ -160,7 +160,12 @@
         /* =========================================
            LOADING SCREEN
            ========================================= */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); }
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; z-index: 9999; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; color: var(--primary); 
+            transition: opacity 0.5s ease; /* 修復 Bug 3: 加入淡出動畫 */
+        }
         .loader-text { font-family: var(--font-code); margin-top: 20px; animation: blink 0.5s infinite; }
         .progress-bar { width: 300px; height: 4px; background: #333; margin-top: 10px; position: relative; }
         .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--primary); width: 0%; transition: width 0.1s; box-shadow: 0 0 10px var(--primary); }
@@ -282,11 +287,13 @@
         }
 
         function initParticles() { particles = []; for (let i = 0; i < 150; i++) particles.push(new Particle()); }
+        
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update(); particles[i].draw();
-                for (let j = i; j < particles.length; j++) {
+                // 修復 Bug 4: 將 j = i 改為 j = i + 1，節省不必要的運算效能
+                for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y; const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < 100) { ctx.beginPath(); ctx.strokeStyle = `rgba(0, 243, 255, ${1 - dist / 100})`; ctx.lineWidth = 0.5; ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
                 }
@@ -320,17 +327,29 @@
             const c = document.getElementById('console');
             const msgs = ["Ping: 24ms", "Gemini 2.5 OK", "Scanning...", "Updating..."];
             const p = document.createElement('div'); p.innerText = `> ${msgs[Math.floor(Math.random()*msgs.length)]}`;
-            c.prepend(p); if(c.children.length > 20) c.removeChild(c.lastChild);
+            // 修復 Bug 2: 將 lastChild 改為 lastElementChild
+            c.prepend(p); if(c.children.length > 20) c.removeChild(c.lastElementChild);
         }
         function animAudio() { document.querySelectorAll('.bar').forEach(b => b.style.height = Math.random()*100 + "%"); }
 
-        // JS MODULE 4: CARD TILT
+        // JS MODULE 4: CARD TILT (修復 Bug 1: 解決閃爍抖動問題)
         document.querySelectorAll('.portal-card').forEach(card => {
-            card.addEventListener('mousemove', e => {
-                const r = card.getBoundingClientRect();
-                card.style.transform = `perspective(2000px) rotateX(${(r.height/2 - (e.clientY-r.top))/10}deg) rotateY(${((e.clientX-r.left)-r.width/2)/10}deg) scale(1.05) translateZ(50px)`;
+            let rect; // 用來儲存卡片的初始邊界
+            
+            card.addEventListener('mouseenter', () => {
+                rect = card.getBoundingClientRect(); // 滑鼠進入時才抓取一次
             });
-            card.addEventListener('mouseleave', () => card.style.transform = `perspective(2000px) rotateX(0) rotateY(0) scale(1) translateZ(0)`);
+
+            card.addEventListener('mousemove', e => {
+                if (!rect) return;
+                // 使用鎖定的 rect 進行計算，避免 transform 造成的數值跳動
+                card.style.transform = `perspective(2000px) rotateX(${(rect.height/2 - (e.clientY-rect.top))/10}deg) rotateY(${((e.clientX-rect.left)-rect.width/2)/10}deg) scale(1.05) translateZ(50px)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(2000px) rotateX(0) rotateY(0) scale(1) translateZ(0)`;
+                rect = null; // 離開時清空
+            });
         });
 
         // JS MODULE 5: GLITCH TEXT
