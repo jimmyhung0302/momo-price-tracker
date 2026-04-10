@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momo 價格追蹤 - 科技數據儀表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- 科技數據風基礎設定 --- */
+        body { 
+            font-family: 'Consolas', 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
+            max-width: 1200px; /* 增加寬度 */
+            margin: 2rem auto; 
+            padding: 0 1.5rem; 
+            background-color: #121212; /* 深色背景 */
+            color: #e0e0e0; /* 淺色文字 */
+            transition: background-color 0.5s;
+            animation: fadeIn 1s ease-out; /* 頁面載入時淡入 */
+        }
+
+        /* 網頁載入時的基礎淡入動畫 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .container { 
+            display: flex; 
+            gap: 25px; 
+        }
+        
+        .main-panel { 
+            flex: 3; /* 讓圖表區佔更大比例 */
+        }
+        
+        /* 數據卡片樣式：深色、有邊框、輕微漂浮 */
+        .data-card {
+            background: #1e1e1e; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid #00e5ff30; /* 弱化邊框 */
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .data-card:hover {
+            box-shadow: 0 12px 30px rgba(0, 229, 255, 0.15); /* 懸停時邊框發光 */
+            transform: translateY(-2px);
+        }
+
+        h2 { 
+            color: #00e5ff; /* 亮青藍色主標題 */
+            border-bottom: 2px solid #00e5ff; 
+            padding-bottom: 10px; 
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.5); /* 標題發光效果 */
+        }
+        
+        h3 {
+            color: #00e5ff; 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 8px;
+        }
+        
+        /* 隱藏手動輸入區 */
+        .controls { display: none; } 
+
+        /* 列表樣式 */
+        .side-panel { 
+            flex: 1; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            /* 應用 data-card 樣式 */
+            background: #1e1e1e; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid #00e5ff30; 
+        }
+        
+        .history-list { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+        
+        .history-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 0; 
+            border-bottom: 1px dashed #333; /* 虛線分隔 */
+        }
+        
+        .history-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .history-info { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .history-date { 
+            font-size: 0.8rem; 
+            color: #888; 
+        }
+        
+        /* 關鍵：突出價格數字 */
+        .history-price { 
+            font-weight: bold; 
+            color: #f7ff00; /* 螢光黃強調價格 */
+            font-size: 1.25rem; 
+            font-family: 'Courier New', monospace; /* 數字字體 */
+            text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+        }
+        
+        /* 狀態標籤 */
+        .status-badge { 
+            display:inline-block; 
+            padding: 5px 10px; 
+            background: #004d40; /* 深綠背景 */
+            color: #64ffda; /* 螢光綠文字 */
+            border-radius: 15px; 
+            font-size: 0.9rem; 
+            margin-bottom: 20px;
+            border: 1px solid #64ffda;
+            box-shadow: 0 0 8px rgba(100, 255, 218, 0.5);
+        }
+        .error-badge { 
+            background: #4e1a1a; 
+            color: #ff5252; 
+            border: 1px solid #ff5252;
+            box-shadow: 0 0 8px rgba(255, 82, 82, 0.5);
+        }
+
+        /* Gemini AI 回應區 */
+        #gemini-response { 
+            margin-top: 0; 
+            padding: 20px; 
+            background: #1e1e1e; 
+            border-radius: 8px; 
+            border-left: 5px solid #00e5ff; /* 亮色邊條 */
+            line-height: 1.7; 
+            color: #e0e0e0; 
+            font-size: 0.95rem;
+            white-space: pre-wrap; /* 保留換行 */
+        }
+
+        /* 確保所有連結在深色背景下可見 */
+        a {
+            color: #00e5ff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+            color: #64ffda;
+        }
+
+        /* 懸浮購買按鈕 (科技風配色) */
+        .momo-cta-button {
+            position: fixed; 
+            right: 20px;     
+            bottom: 20px;    
+            z-index: 1000;   
+            
+            background-color: #ff5252; /* 醒目的警示紅/橘色 */
+            color: white;
+            
+            padding: 15px 25px;
+            border-radius: 30px; 
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 82, 82, 0.6); /* 強烈發光陰影 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .momo-cta-button:hover {
+            background-color: #ff1744; 
+            transform: scale(1.05); /* 放大效果更明顯 */
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📈 AI 價格追蹤儀表板(金士頓KC3000 2TB) </h2>
+    <div id="statusArea" class="status-badge">正在連線資料庫...</div>
+
+    <div class="container">
+        <div class="main-panel">
+            <div class="data-card">
+                <canvas id="myChart" height="250"></canvas>
+            </div>
+
+            <div class="data-card">
+                <h3 style="margin-top:0; border-bottom: 1px solid #333; padding-bottom:8px;">✨ Gemini 最新分析報告</h3>
+                <div id="gemini-response">尚無分析資料，請執行 Python 爬蟲...</div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <h3 style="margin-top:0;">歷史紀錄</h3>
+            <ul id="historyList" class="history-list">
+                </ul>
+        </div>
+    </div>
+
+    <a href="https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=10492723" 
+       target="_blank" 
+       class="momo-cta-button">
+        🛒 前往 momo 購買
+    </a>
+
+    <script type="module">
+        let chart;
+        let priceHistory = [];
+
+        // 初始化：網頁打開時，自動去讀取 json 檔
+        window.onload = async function() {
+            await loadJSONData();
+        };
+
+        // 數據載入完成後播放短音效
+        function playConsoleSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, context.currentTime); 
+                gainNode.gain.setValueAtTime(0.5, context.currentTime); 
+                gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.3); 
+
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.3);
+
+            } catch (e) {
+                console.warn("瀏覽器不支援 Web Audio API 或用戶未互動。");
+            }
+        }
+
+
+        async function loadJSONData() {
+            const statusEl = document.getElementById('statusArea');
+            try {
+                // 讀取 Python 生成的檔案 (加上時間戳記防止快取)
+                const response = await fetch('./price_data1.json?t=' + new Date().getTime());
+                
+                if (!response.ok) throw new Error("找不到檔案");
+                
+                priceHistory = await response.json();
+                
+                statusEl.innerText = "✅ 已同步最新資料庫";
+                statusEl.className = "status-badge";
+
+                playConsoleSound(); // 數據載入成功時播放提示音
+
+                updateUI();
+
+                // 自動顯示最新一筆的 AI 分析
+                if (priceHistory.length > 0) {
+                    const latest = priceHistory[priceHistory.length - 1];
+                    if (latest.ai_analysis) {
+                        // 把換行符號轉成 HTML 換行
+                        const formattedText = latest.ai_analysis.replace(/\n/g, '<br>');
+                        document.getElementById('gemini-response').innerHTML = formattedText;
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = "⚠️ 讀取失敗：請確認已執行 python -m http.server";
+                statusEl.className = "status-badge error-badge";
+                document.getElementById('gemini-response').innerHTML = "無法讀取 price_data.json。<br>請確認 Python 伺服器是否已啟動。";
+            }
+        }
+
+        // 更新所有 UI (圖表 + 列表)
+        function updateUI() {
+            renderChart();
+            renderList();
+        }
+
+        // 繪製列表 (最新的顯示在最上面)
+        function renderList() {
+            const listEl = document.getElementById('historyList');
+            listEl.innerHTML = ''; 
+
+            if (priceHistory.length === 0) {
+                listEl.innerHTML = '<li style="color:#999; text-align:center; padding:20px;">尚無資料</li>';
+                return;
+            }
+
+            // 反轉順序顯示
+            const listItems = [...priceHistory].reverse();
+
+            listItems.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                
+                // 讓最新一筆資料特別突出
+                const isLatest = index === 0;
+
+                li.innerHTML = `
+                    <div class="history-info">
+                        <span class="history-date">${item.date} ${isLatest ? '(最新)' : ''}</span>
+                        <span class="history-price" style="${isLatest ? 'color:#00e5ff;' : ''}">$${item.price}</span>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        // 繪製圖表
+        function renderChart() {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const labels = priceHistory.map(item => item.date);
+            const data = priceHistory.map(item => item.price);
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '價格走勢',
+                        data: data,
+                        borderColor: '#00e5ff', /* 科技藍 */
+                        backgroundColor: 'rgba(0, 229, 255, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#00e5ff',
+                        pointRadius: 5,
+                        tension: 0.2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0' /* 圖例顏色 */
+                            }
+                        },
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: false,
+                            grid: {
+                                color: '#333' /* Y軸網格線 */
+                            },
+                            ticks: {
+                                color: '#e0e0e0' /* Y軸標籤 */
+                            }
+                        },
+                        x: { 
+                            grid: {
+                                color: '#333' /* X軸網格線 */
+                            },
+                            ticks: {
+                                color: '#e0e0e0' /* X軸標籤 */
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momo 價格自動追蹤儀表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- 維持原本漂亮的樣式 --- */
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; background-color: #f9f9f9; }
+        .container { display: flex; gap: 20px; }
+        .main-panel { flex: 2; }
+        .side-panel { flex: 1; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: fit-content; max-height: 80vh; overflow-y: auto; }
+        h2 { color: #333; border-bottom: 2px solid #4285F4; padding-bottom: 10px; }
+        
+        /* 隱藏手動輸入區，因為現在是自動化的 */
+        .controls { display: none; } 
+
+        /* 列表樣式 */
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .history-item:last-child { border-bottom: none; }
+        .history-info { display: flex; flex-direction: column; }
+        .history-date { font-size: 0.85rem; color: #888; }
+        .history-price { font-weight: bold; color: #333; font-size: 1.1rem; }
+        
+        /* 狀態標籤 */
+        .status-badge { display:inline-block; padding: 5px 10px; background: #e8f5e9; color: #2e7d32; border-radius: 15px; font-size: 0.9rem; margin-bottom: 15px;}
+        .error-badge { background: #ffebee; color: #c62828; }
+
+        /* Gemini 回應區 */
+        #gemini-response { margin-top: 20px; padding: 20px; background: #eef; border-radius: 8px; border-left: 5px solid #4285F4; line-height: 1.6; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h2>📈 AI 價格追蹤儀表板 </h2>
+    <div id="statusArea" class="status-badge">正在連線資料庫...</div>
+
+    <div class="container">
+        <div class="main-panel">
+            <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <canvas id="myChart" height="250"></canvas>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3 style="color:#4285F4;">✨ Gemini 最新分析報告</h3>
+                <div id="gemini-response">尚無分析資料，請執行 Python 爬蟲...</div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <h3 style="margin-top:0; border-bottom: 1px solid #ddd; padding-bottom:10px;">歷史紀錄</h3>
+            <ul id="historyList" class="history-list">
+                </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        // ---------------------------------------------------------
+        // 自動化版本不需要前端 API Key，因為 Python 已經幫你問完 AI 了！
+        // ---------------------------------------------------------
+
+        let chart;
+        let priceHistory = [];
+
+        // 初始化：網頁打開時，自動去讀取 json 檔
+        window.onload = async function() {
+            await loadJSONData();
+        };
+
+        async function loadJSONData() {
+            const statusEl = document.getElementById('statusArea');
+            try {
+                // 讀取 Python 生成的檔案 (加上時間戳記防止快取)
+                const response = await fetch('./price_data.json?t=' + new Date().getTime());
+                
+                if (!response.ok) throw new Error("找不到檔案");
+                
+                priceHistory = await response.json();
+                
+                statusEl.innerText = "✅ 已同步最新資料庫";
+                statusEl.className = "status-badge";
+
+                updateUI();
+
+                // 自動顯示最新一筆的 AI 分析
+                if (priceHistory.length > 0) {
+                    const latest = priceHistory[priceHistory.length - 1];
+                    if (latest.ai_analysis) {
+                        // 把換行符號轉成 HTML 換行
+                        const formattedText = latest.ai_analysis.replace(/\n/g, '<br>');
+                        document.getElementById('gemini-response').innerHTML = formattedText;
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = "⚠️ 讀取失敗：請確認已執行 python -m http.server";
+                statusEl.className = "status-badge error-badge";
+                document.getElementById('gemini-response').innerText = "無法讀取 price_data.json。請確認 Python 伺服器是否已啟動。";
+            }
+        }
+
+        // 更新所有 UI (圖表 + 列表)
+        function updateUI() {
+            renderChart();
+            renderList();
+        }
+
+        // 繪製列表 (最新的顯示在最上面)
+        function renderList() {
+            const listEl = document.getElementById('historyList');
+            listEl.innerHTML = ''; 
+
+            if (priceHistory.length === 0) {
+                listEl.innerHTML = '<li style="color:#999; text-align:center; padding:20px;">尚無資料</li>';
+                return;
+            }
+
+            // 反轉順序顯示
+            const listItems = [...priceHistory].reverse();
+
+            listItems.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div class="history-info">
+                        <span class="history-date">${item.date}</span>
+                        <span class="history-price">$${item.price}</span>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        // 繪製圖表
+        function renderChart() {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const labels = priceHistory.map(item => item.date);
+            const data = priceHistory.map(item => item.price);
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '價格走勢',
+                        data: data,
+                        borderColor: '#4285F4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#4285F4',
+                        pointRadius: 4,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                    },
+                    scales: {
+                        y: { beginAtZero: false } 
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
