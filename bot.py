@@ -7,7 +7,7 @@ import google.generativeai as genai
 import re
 
 
-API_KEY = "AIzaSyDbCq23U_1hQE5vF8IS4fp4lyurPyiourQ"
+API_KEY = "AIzaSyByEq1b-f2gz--rKjZ18dfs7VHY0CEHLrI"
 
 
 TARGET_URL = "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12627127&osm=Ad07&utm_source=googleshop&utm_medium=traffic-pla-3C&gad_source=1&gad_campaignid=22679348820&gbraid=0AAAAADlbkmNQBiC82wiUNXAS1zkcMPUQ7&gclid=Cj0KCQiA_8TJBhDNARIsAPX5qxTy-Jo_TC9SGV9r3_vmd3khcEBYPN-HyzPEaguM6Q9wmYwKyRkil-gaAnSiEALw_wcB"
