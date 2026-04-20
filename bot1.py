@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 # ================= 設定區 (新專案) =================
 # 1. 填入你的 Gemini API Key
-API_KEY = "AIzaSyByEq1b-f2gz--rKjZ18dfs7VHY0CEHLrI"
+API_KEY = "AIzaSyBZ0lvhTAaef3QMwWsOdTWmAsExzyBaMXE"
 
 # 2. 新的目標商品 (DRAM)
 TARGET_URL = "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9573275&Area=search&mdiv=403&oid=1_1&cid=index&kw=kc3000"
