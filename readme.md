@@ -19,7 +19,7 @@ AI 分析： Google Gemini API (google.generativeai)
 解決 macOS 下 Docker 的網路限制與 Safari 安全性阻擋問題。
 
 如何執行 (安裝與使用方式)
-複製此專案：git clone [你的 GitHub 網址]
+複製此專案：git clone [https://github.com/jimmyhung0302/momo-price-tracker]
 
 建立並啟動 Conda 虛擬環境
 
