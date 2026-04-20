@@ -52,7 +52,7 @@ def run_benchmark(cores_to_use, workload_per_core):
     operations_per_second = total_workload / time_taken
     score = int(operations_per_second / 20000)
 
-    print(f"✅ 測試完成！")
+    print(f"ㄋ測試完成！")
     print(f"⏱️ 總耗時: {time_taken:.2f} 秒")
     print(f"🏆 M2 長時效能綜合跑分: {score:,} 分")
 
