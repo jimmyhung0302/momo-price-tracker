@@ -35,6 +35,6 @@ AI 協作聲明
 相關連結
 專題展示網站： [(https://jimmyhung0302.github.io/momo-price-tracker/)]
 
-期中簡報檔： [請替換成你的簡報 PDF 或 Google Slides 連結]
+期中簡報檔： [(https://docs.google.com/presentation/d/1k7awQjV6lwn7WHRR_qPH39KJl8R9k9z7zdpcYxG1jhA/edit?usp=sharing)]
 
 執行展示影片 (YouTube)： https://youtu.be/mGx7TMgrF4k
