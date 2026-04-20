@@ -33,7 +33,7 @@ AI 協作聲明
 本專案開發過程全程採用 AI (Gemini) 輔助，涵蓋架構規劃、程式碼生成、環境除錯、突破反爬蟲限制以及 Docker/n8n 部署設定。詳細對話紀錄與截圖請參閱期中簡報。
 
 相關連結
-專題展示網站： [請替換成你的 GitHub Pages 網址]
+專題展示網站： [(https://jimmyhung0302.github.io/momo-price-tracker/)]
 
 期中簡報檔： [請替換成你的簡報 PDF 或 Google Slides 連結]
 
