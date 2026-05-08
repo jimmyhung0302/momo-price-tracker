@@ -54,6 +54,7 @@ def main():
         except KeyboardInterrupt:
             print("\n測試中斷。")
             break
+        
 
 if __name__ == "__main__":
     main()
