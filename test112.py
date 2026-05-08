@@ -4,10 +4,10 @@ def unrequitted_experience(lover):
     print(f"你總共暈過{count}個女生")
     
     mixed_name="+".join(lover)
-    
+
 
     return mixed_name
-my_belove=["Chen","Liu","Yan","Chen"]
+my_belove=["Chen hai","Liu","Yan","Chen"]
 love=unrequitted_experience(my_belove)
 
 print(love)
