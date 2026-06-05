@@ -1,0 +1,33 @@
+name: Daily Momo Price Crawler
+
+on:
+  schedule:
+    # 每天台灣時間凌晨 2:00 執行 (UTC 時間 18:00)
+    - cron: '0 18 * * *'
+  # 允許你在 GitHub 網頁上手動點擊觸發測試
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 複製 GitHub 程式碼
+      uses: actions/checkout@v3
+
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 安裝爬蟲必要套件
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 執行爬蟲腳本
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        API_KEY: ${{ secrets.API_KEY }}
+      run: |
+        python main_tracker.py
