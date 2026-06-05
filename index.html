@@ -238,6 +238,7 @@
                 .then(result => {
                     const tableBody = document.getElementById('price-table-body');
                     tableBody.innerHTML = ''; 
+                    console.log("🔍 API 傳來的真實資料：", result);
 
                     result.forEach(item => {
                         const row = `
