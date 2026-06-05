@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware  # 👈 1. 載入 CORS 套件
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
+import traceback
 
 app = FastAPI()
 
@@ -20,12 +21,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 def get_db_connection():
+    
     try:
-        # 建立與 Render PostgreSQL 的連線
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
         return conn
     except Exception as e:
-        print(f"資料庫連線失敗: {e}")
+        # 完整印出錯誤追蹤，而不僅僅是錯誤訊息
+        print(f"詳細錯誤發生：{traceback.format_exc()}")
         return None
 
 @app.get("/")
