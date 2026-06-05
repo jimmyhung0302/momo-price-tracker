@@ -131,6 +131,14 @@
                 <h2><i class="fas fa-database"></i> LIVE PRICE DATABASE</h2>
                 <span style="font-family: var(--font-code); color: var(--alert); animation: blink 1s infinite;">● REC</span>
             </div>
+            
+            
+            <div style="background-color: rgba(0, 255, 204, 0.1); border-left: 4px solid #00ffcc; padding: 15px; margin-bottom: 20px; font-family: monospace;">
+                <h4 style="color: #00ffcc; margin-top: 0; margin-bottom: 10px;">⚡ LATEST AI INSIGHT</h4>
+                <div id="ai-display" style="color: #e0e0e0; font-size: 0.9em; line-height: 1.5;">
+                    _ 等待神經網路連線中...
+                </div>
+            </div>
             <div class="table-container">
                 <table class="cyber-table">
                     <thead>
@@ -139,8 +147,7 @@
                             <th>MODEL NAME</th>
                             <th>CAPACITY</th>
                             <th>PRICE (NTD)</th>
-                            <th>AI ANALYSIS</th>
-                        </tr>
+                            </tr>
                     </thead>
                     <tbody id="price-table-body">
                         <tr><td colspan="4" style="text-align: center;">> Awaiting data stream...</td></tr>
@@ -234,43 +241,48 @@
         // 核心功能：從 FastAPI 獲取資料並渲染表格
         // =========================================
         function fetchPrices() {
-            fetch('https://momo-price-tracker-di1s.onrender.com/api/prices')
-                .then(response => response.json())
-                .then(result => {
-                    const tableBody = document.getElementById('price-table-body');
-                    tableBody.innerHTML = ''; 
-                    console.log("🔍 API 傳來的真實資料：", result);
+    fetch('https://momo-price-tracker-di1s.onrender.com/api/prices')
+        .then(response => response.json())
+        .then(result => {
+            // --- 🤖 1. 獨立抽出「最新」的 AI 分析 ---
+            if (result.length > 0) {
+                // 只看第 0 筆 (最新的一天) 有沒有 AI 分析
+                const latestAiText = result[0].ai_analysis ? result[0].ai_analysis : "今日尚未產生分析報告。";
+                // 把文字倒進我們剛剛做好的獨立面板裡
+                document.getElementById('ai-display').innerText = latestAiText;
+            }
 
-                    // 注意：這裡直接用 result.forEach 就好！
-        result.forEach(item => {
-            // 判斷：如果有 AI 分析就顯示，沒有就顯示預設文字
-            const aiText = item.ai_analysis ? item.ai_analysis : "分析資料同步中...";
-            
-            const row = `
-                <tr>
-                    <td>${item.record_date}</td>
-                    <td style="color: var(--primary);">${item.model_name}</td>
-                    <td>${item.capacity}</td>
-                    <td class="price-hl">$${item.price}</td>
-                    <td style="font-size: 0.85em; color: #00ffcc; max-width: 300px; white-space: normal;">
-                        >_ ${aiText}
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
+            // --- 📊 2. 渲染乾淨的歷史價格表格 ---
+            const tableBody = document.getElementById('price-table-body');
+            tableBody.innerHTML = '';
+
+            result.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.record_date}</td>
+                        <td style="color: var(--primary);">${item.model_name}</td>
+                        <td>${item.capacity}</td>
+                        <td class="price-hl">$${item.price}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => {
+            // 替換掉點點點，改成正確的錯誤印出指令
+            console.error("抓取資料時發生錯誤：", error); 
         });
-                })
-                .catch(error => {
-                    console.error('API 讀取失敗:', error);
-                    document.getElementById('price-table-body').innerHTML = `<tr><td colspan="4" style="color:var(--alert); text-align:center;">> [ERROR] 連線至 API 失敗。請確認終端機 FastAPI 伺服器 (uvicorn) 是否運作中。</td></tr>`;
-                });
-        }
+} // 👈 這裡就是最關鍵的「關門」大括號！把 fetchPrices() 完美包起來。
 
-        window.onload = function() {
-            initParticles(); animateParticles(); runLoader();
-            setInterval(updateClock, 1000); setInterval(updateStats, 2000); setInterval(genLog, 1500); setInterval(animAudio, 200);
-            setTimeout(typeWriter, 3500); 
-        };
+window.onload = function() {
+    initParticles(); animateParticles(); runLoader();
+    setInterval(updateClock, 1000); setInterval(updateStats, 2000); setInterval(genLog, 1500); setInterval(animAudio, 200);
+    setTimeout(typeWriter, 3500); 
+    
+    // 💡 小提醒：確保你有在這裡呼叫 fetchPrices(); 喔！
+    fetchPrices(); 
+};
     </script>
-</body>
-</html>
+</body>   
+
+
