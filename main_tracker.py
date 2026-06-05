@@ -9,9 +9,8 @@ import psycopg2
 # ==========================================
 # 1. 參數設定區 (請填入你的金鑰與密碼)
 # ==========================================
-API_KEY = "API_KEY"
-# ⚠️ 請替換成你真實的 Render 密碼
-DATABASE_URL = "DATABASE_URL"
+API_KEY = os.getenv("API_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL")
 TARGET_URL = "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9573275"
 SELECTOR = "li.special span" 
 DB_FILE = "price_data.json"

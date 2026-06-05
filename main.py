@@ -1,11 +1,24 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware  # 👈 1. 載入 CORS 套件
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import os
 
 app = FastAPI()
 
-# ⚠️ 請將這串替換成你剛剛在 DBeaver 成功連線的完整 External Database URL
-DATABASE_URL = "DATABASE_URL"
+# 👇 2. 加上這整段 CORS 設定，允許 GitHub Pages 來拿資料
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允許所有來源 (包含你的 GitHub Pages)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. 記得要用環境變數讀密碼喔！
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
 def get_db_connection():
     try:
         # 建立與 Render PostgreSQL 的連線
