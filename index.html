@@ -233,7 +233,7 @@
         // 核心功能：從 FastAPI 獲取資料並渲染表格
         // =========================================
         function fetchPrices() {
-            fetch('https://momo-price-tracker-di1s.onrender.com')
+            fetch('https://momo-price-tracker-di1s.onrender.com/api/prices')
                 .then(response => response.json())
                 .then(result => {
                     const tableBody = document.getElementById('price-table-body');
