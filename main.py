@@ -5,7 +5,7 @@ from psycopg2.extras import RealDictCursor
 app = FastAPI()
 
 # ⚠️ 請將這串替換成你剛剛在 DBeaver 成功連線的完整 External Database URL
-DATABASE_URL = "postgresql://dram_ssd_db_user:ZQCTKB3yazBrHaVli1aWgHXnGPJG0AS3@dpg-d8h5nl28pkls73c14vs0-a.singapore-postgres.render.com/dram_ssd_db"
+DATABASE_URL = "DATABASE_URL"
 def get_db_connection():
     try:
         # 建立與 Render PostgreSQL 的連線
