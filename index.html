@@ -240,7 +240,7 @@
                     tableBody.innerHTML = ''; 
                     console.log("🔍 API 傳來的真實資料：", result);
 
-                    result.forEach(item => {
+                    result.data.forEach(item => {
                         const row = `
                             <tr>
                                 <td>${item.record_date}</td>
