@@ -241,7 +241,7 @@
                     tableBody.innerHTML = ''; 
                     console.log("🔍 API 傳來的真實資料：", result);
 
-                    result.data.forEach(item => {
+                    result.forEach(item => {
                         const aiText = item.ai_analysis ? item.ai_analysis : "分析資料同步中...";
                         const row = `
                             <tr>
