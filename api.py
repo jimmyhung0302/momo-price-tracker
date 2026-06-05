@@ -8,7 +8,7 @@ app = FastAPI()
 # 允許前端跨域請求 (很重要！這樣 Vercel 上的網頁才能讀取這個 API)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 允許所有來源
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
