@@ -44,7 +44,7 @@ def get_prices():
     try:
         # 使用 RealDictCursor 讓撈出來的資料直接變成 Python 字典格式 (JSON)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT * FROM ssd_prices ORDER BY record_date DESC;")
+        cursor.execute("SELECT record_date, model_name, capacity, price, ai_analysis FROM ssd_prices ORDER BY record_date DESC")
         prices = cursor.fetchall()
         
         cursor.close()

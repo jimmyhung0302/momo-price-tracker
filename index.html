@@ -139,6 +139,7 @@
                             <th>MODEL NAME</th>
                             <th>CAPACITY</th>
                             <th>PRICE (NTD)</th>
+                            <th>AI ANALYSIS</th>
                         </tr>
                     </thead>
                     <tbody id="price-table-body">
@@ -241,6 +242,7 @@
                     console.log("🔍 API 傳來的真實資料：", result);
 
                     result.data.forEach(item => {
+                        const aiText = item.ai_analysis ? item.ai_analysis : "分析資料同步中...";
                         const row = `
                             <tr>
                                 <td>${item.record_date}</td>
