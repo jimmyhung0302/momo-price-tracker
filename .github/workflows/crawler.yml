@@ -3,7 +3,7 @@ name: Daily Momo Price Crawler
 on:
   schedule:
     # "*/5 * * * *" 的意思是：每隔 5 分鐘執行一次
-    - cron: '*/5 * * * *'
+    - cron: '0 16 * * *'
   # 允許你在 GitHub 網頁上手動點擊觸發測試
   workflow_dispatch:
 
