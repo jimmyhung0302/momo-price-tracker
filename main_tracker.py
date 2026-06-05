@@ -51,9 +51,12 @@ def get_product_info():
             
         final_price = int(clean_price)
         
-        # 抓取商品名稱 (為了符合資料庫 Schema)
-        title_tag = soup.find('h1', {'id': 'osmGoodsName'})
-        model_name = title_tag.text.strip() if title_tag else "Momo SSD (未抓取到名稱)"
+        # 抓取商品名稱 (改用最穩定的 og:title 標籤)
+        meta_title = soup.find('meta', property='og:title')
+        if meta_title and meta_title.get('content'):
+            model_name = meta_title['content'].strip()
+        else:
+            model_name = "Momo SSD (未抓取到名稱)"
         
         # 簡易判斷容量
         capacity = "1TB" 
