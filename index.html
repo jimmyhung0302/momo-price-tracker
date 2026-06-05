@@ -241,18 +241,24 @@
                     tableBody.innerHTML = ''; 
                     console.log("🔍 API 傳來的真實資料：", result);
 
-                    result.forEach(item => {
-                        const aiText = item.ai_analysis ? item.ai_analysis : "分析資料同步中...";
-                        const row = `
-                            <tr>
-                                <td>${item.record_date}</td>
-                                <td style="color: var(--primary);">${item.model_name}</td>
-                                <td>${item.capacity}</td>
-                                <td class="price-hl">$${item.price}</td>
-                            </tr>
-                        `;
-                        tableBody.innerHTML += row;
-                    });
+                    // 注意：這裡直接用 result.forEach 就好！
+        result.forEach(item => {
+            // 判斷：如果有 AI 分析就顯示，沒有就顯示預設文字
+            const aiText = item.ai_analysis ? item.ai_analysis : "分析資料同步中...";
+            
+            const row = `
+                <tr>
+                    <td>${item.record_date}</td>
+                    <td style="color: var(--primary);">${item.model_name}</td>
+                    <td>${item.capacity}</td>
+                    <td class="price-hl">$${item.price}</td>
+                    <td style="font-size: 0.85em; color: #00ffcc; max-width: 300px; white-space: normal;">
+                        >_ ${aiText}
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
                 })
                 .catch(error => {
                     console.error('API 讀取失敗:', error);
