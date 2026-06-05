@@ -37,19 +37,32 @@ def read_root():
 # 建立讀取價格的 API 端點
 @app.get("/api/prices")
 def get_prices():
-    conn = get_db_connection()
-    if conn is None:
-        raise HTTPException(status_code=500, detail="無法連線到資料庫")
-    
     try:
-        # 使用 RealDictCursor 讓撈出來的資料直接變成 Python 字典格式 (JSON)
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT record_date, model_name, capacity, price, ai_analysis FROM ssd_prices ORDER BY record_date DESC")
-        prices = cursor.fetchall()
+        conn = get_db_connection()
+        if conn is None:
+            return {"detail": "無法連線到資料庫"}
+            
+        cursor = conn.cursor()
         
+        # 👇 1. 這裡的 SELECT 要加上 ai_analysis
+        cursor.execute("SELECT record_date, model_name, capacity, price, ai_analysis FROM ssd_prices ORDER BY record_date DESC")
+        rows = cursor.fetchall()
+        
+        result = []
+        for row in rows:
+            result.append({
+                "record_date": row[0],
+                "model_name": row[1],
+                "capacity": row[2],
+                "price": row[3],
+                # 👇 2. 就是加在這裡！
+                "ai_analysis": row[4]  
+            })
+            
         cursor.close()
         conn.close()
+        return result
         
-        return {"status": "success", "data": prices}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"查詢失敗: {e}")
+        return {"detail": "Internal Server Error"}
