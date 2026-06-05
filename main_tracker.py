@@ -96,25 +96,40 @@ def ask_gemini(history_data):
 # ==========================================
 # 4. 雲端資料庫上傳功能 (新增)
 # ==========================================
-def upload_data_to_db(product_info):
-    print("☁️ 準備將今日價格同步至 Render 雲端資料庫...")
+def upload_data_to_db(product_info, ai_advice): # 👈 注意這裡多收了一個 ai_advice 參數
+    print("☁️ 準備將今日價格與 AI 分析同步至 Render 雲端資料庫...")
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         
         today_date = datetime.date.today().isoformat()
         
-        insert_query = """
-            INSERT INTO ssd_prices (model_name, capacity, price, record_date) 
-            VALUES (%s, %s, %s, %s)
-        """
+        # 1. 檢查站：查詢今天是否已經有這顆 SSD 的紀錄
+        check_query = "SELECT id FROM ssd_prices WHERE model_name = %s AND record_date = %s"
+        cursor.execute(check_query, (product_info["model_name"], today_date))
+        existing_record = cursor.fetchone()
         
-        cursor.execute(insert_query, (
-            product_info["model_name"], 
-            product_info["capacity"], 
-            product_info["price"], 
-            today_date
-        ))
+        if existing_record:
+            # 情況 A：已經有紀錄，更新價格與 AI 分析
+            update_query = """
+                UPDATE ssd_prices 
+                SET price = %s, ai_analysis = %s 
+                WHERE model_name = %s AND record_date = %s
+            """
+            cursor.execute(update_query, (product_info["price"], ai_advice, product_info["model_name"], today_date))
+        else:
+            # 情況 B：今天還沒有紀錄，新增資料 (包含 ai_analysis)
+            insert_query = """
+                INSERT INTO ssd_prices (model_name, capacity, price, record_date, ai_analysis) 
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (
+                product_info["model_name"], 
+                product_info["capacity"], 
+                product_info["price"], 
+                today_date,
+                ai_advice
+            ))
         
         conn.commit()
         cursor.close()
@@ -162,7 +177,7 @@ def main():
             json.dump(history, f, ensure_ascii=False, indent=2)
             
         # 4. 同步至雲端 PostgreSQL (呼叫我們新增的功能)
-        upload_data_to_db(product_info)
+        upload_data_to_db(product_info, ai_advice)
         
         print("\n🎉 任務完美結束！資料已存入 JSON 與雲端資料庫。")
     else:
