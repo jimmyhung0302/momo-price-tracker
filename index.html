@@ -239,7 +239,7 @@
                     const tableBody = document.getElementById('price-table-body');
                     tableBody.innerHTML = ''; 
 
-                    result.data.forEach(item => {
+                    result.forEach(item => {
                         const row = `
                             <tr>
                                 <td>${item.record_date}</td>
