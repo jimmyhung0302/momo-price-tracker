@@ -84,6 +84,8 @@
         .cyber-table td { padding: 15px; border-bottom: 1px solid rgba(0, 243, 255, 0.1); color: #fff; font-family: var(--font-code); transition: 0.2s; }
         .cyber-table tbody tr:hover td { background: rgba(0, 243, 255, 0.1); text-shadow: 0 0 5px #fff; }
         .price-hl { color: #0f0; text-shadow: 0 0 8px #0f0; font-weight: bold; }
+        /* 限制第二欄 (MODEL NAME) 的最大寬度，讓長文字乖乖自動換行，增加行距 */
+        .cyber-table td:nth-child(2) { max-width: 350px; line-height: 1.6; }
 
         /* Gemini Input */
         .gemini-bar-container { grid-column: 1 / 4; display: flex; justify-content: center; align-items: center; position: relative; }
