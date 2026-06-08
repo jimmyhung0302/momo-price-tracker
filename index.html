@@ -65,7 +65,22 @@
         .table-container { flex: 1; overflow-y: auto; border: 1px solid var(--border); background: rgba(10, 10, 20, 0.8); backdrop-filter: blur(10px); box-shadow: inset 0 0 30px rgba(0,243,255,0.05); }
         
         .cyber-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .cyber-table th { background: rgba(0, 243, 255, 0.15); color: var(--secondary); padding: 15px; font-size: 0.9rem; letter-spacing: 2px; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .cyber-table th { 
+            /* 1. 把背景改成深色，幾乎不透明 */
+            background: rgba(10, 15, 25, 0.95); 
+            /* 2. 加上毛玻璃特效，讓底下鑽過去的字被模糊掉 */
+            backdrop-filter: blur(10px); 
+            color: var(--secondary); 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            letter-spacing: 2px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 5; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            /* 3. 加一條細細的螢光藍色底線，切開標題與內容 */
+            border-bottom: 1px solid var(--primary); 
+        }
         .cyber-table td { padding: 15px; border-bottom: 1px solid rgba(0, 243, 255, 0.1); color: #fff; font-family: var(--font-code); transition: 0.2s; }
         .cyber-table tbody tr:hover td { background: rgba(0, 243, 255, 0.1); text-shadow: 0 0 5px #fff; }
         .price-hl { color: #0f0; text-shadow: 0 0 8px #0f0; font-weight: bold; }
