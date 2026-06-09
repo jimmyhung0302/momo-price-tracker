@@ -134,7 +134,7 @@ def upload_data_to_db(product_info, ai_advice): # 👈 注意這裡多收了一�
         conn.commit()
         cursor.close()
         conn.close()
-        print("✅ 成功同步至雲端資料庫！")
+        print(" 成功同步至雲端資料庫！")
         
     except Exception as e:
         print(f"❌ 雲端資料庫寫入失敗: {e}")
