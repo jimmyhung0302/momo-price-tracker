@@ -109,7 +109,68 @@
         .loader-text { font-family: var(--font-code); margin-top: 20px; animation: blink 0.5s infinite; }
         .progress-bar { width: 300px; height: 4px; background: #333; margin-top: 10px; position: relative; }
         .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--primary); width: 0%; transition: width 0.1s; box-shadow: 0 0 10px var(--primary); }
+
+        /* =========================================
+           📱 RWD 手機版響應式設計 (寬度小於 768px 時觸發)
+           ========================================= */
+           @media (max-width: 768px) {
+            /* 1. 解除高度鎖定，允許手機上下滑動 */
+            body {
+                height: auto;
+                overflow-y: auto;
+            }
+
+            /* 2. 把原本的三欄 Grid 打平，變成一直線 (Stacking) */
+            .ui-grid {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+                gap: 15px;
+            }
+
+            /* 3. 調整頂部欄位，讓 Logo 和數據疊起來 */
+            .top-bar {
+                flex-direction: column;
+                padding: 15px 10px;
+                gap: 10px;
+                text-align: center;
+            }
+            .logo-area h1 { font-size: 1.5rem; }
+            .top-bar::before, .top-bar::after { display: none; } /* 手機版隱藏裝飾線 */
+
+            /* 4. 解除左右側邊欄的內縮限制 */
+            .left-sidebar, .right-sidebar, .center-stage {
+                padding: 0;
+                border: none;
+                width: 100%;
+            }
+
+            /* 5. 拯救表格：讓太長的表格可以在手機上「左右滑動」 */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; /* 讓 iOS 滑動更滑順 */
+            }
+            .cyber-table th, .cyber-table td {
+                padding: 10px;
+                font-size: 0.8rem;
+                white-space: nowrap; /* 強制文字不換行，靠滑動觀看 */
+            }
+
+            /* 6. 調整 Gemini 語音輸入框的大小 */
+            .gemini-input {
+                width: 100%;
+                height: 50px;
+                padding: 0 15px;
+            }
+            #typewriter-text { font-size: 0.85rem; }
+            
+            /* 7. 把圖表高度縮小一點 */
+            .chart-box { height: 120px; }
+            #priceChart { height: 200px !important; }
+        }
     </style>
+
 </head>
 <body>
 
