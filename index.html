@@ -91,6 +91,30 @@
         .price-hl { color: #0f0; text-shadow: 0 0 8px #0f0; font-weight: bold; }
         /* 限制第二欄 (MODEL NAME) 的最大寬度，讓長文字乖乖自動換行，增加行距 */
         .cyber-table td:nth-child(2) { max-width: 350px; line-height: 1.6; }
+        @media (max-width: 768px) {
+            /* ... (上面省略) ... */
+
+            /* 5. 拯救表格：讓太長的表格可以在手機上「左右滑動」 */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; 
+            }
+            .cyber-table th, .cyber-table td {
+                padding: 10px;
+                font-size: 0.8rem;
+                white-space: nowrap; 
+            }
+
+            /* 👇 新增這段：專門對付「第二欄 (MODEL NAME)」的超長文字 👇 */
+            .cyber-table td:nth-child(2) {
+                max-width: 150px; /* 限制品名最大寬度，大約佔手機螢幕一半 */
+                overflow: hidden; /* 把超過寬度的字藏起來 */
+                text-overflow: ellipsis; /* 把被藏起來的字變成刪節號 ... */
+                white-space: nowrap; /* 強制不准換行 */
+            }
+
+            /* ... (下面省略) ... */
+        }
 
         /* Gemini Input */
         .gemini-bar-container { grid-column: 1 / 4; display: flex; justify-content: center; align-items: center; position: relative; }
