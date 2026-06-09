@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>AI Price Tracker Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Price Tracker Dashboard</title>
@@ -137,9 +142,11 @@
                     > Database Linked...<br>
                 </div>
             </div>
-            <div class="panel" style="flex:1;">
-                <h3><i class="fas fa-network-wired"></i> Neural Net</h3>
-                <div style="width:100%; height:100%; background: radial-gradient(circle, var(--primary) 2px, transparent 3px); background-size: 20px 20px; opacity:0.3;"></div>
+            <div class="panel" style="flex:1; display:flex; flex-direction:column;">
+                <h3><i class="fas fa-chart-line"></i> PRICE TREND</h3>
+                <div style="flex:1; position:relative; width:100%;">
+                    <canvas id="priceChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -257,15 +264,14 @@
         // =========================================
         // 核心功能：從 FastAPI 獲取資料並渲染表格
         // =========================================
+        let priceChartInstance = null;
         function fetchPrices() {
     fetch('https://momo-price-tracker-di1s.onrender.com/api/prices')
         .then(response => response.json())
         .then(result => {
             // --- 🤖 1. 獨立抽出「最新」的 AI 分析 ---
             if (result.length > 0) {
-                // 只看第 0 筆 (最新的一天) 有沒有 AI 分析
                 const latestAiText = result[0].ai_analysis ? result[0].ai_analysis : "今日尚未產生分析報告。";
-                // 把文字倒進我們剛剛做好的獨立面板裡
                 document.getElementById('ai-display').innerText = latestAiText;
             }
 
@@ -277,19 +283,70 @@
                 const row = `
                     <tr>
                         <td>${item.record_date}</td>
-                        <td style="color: var(--primary);">${item.model_name}</td>
+                        <td style="color: var(--primary); max-width: 350px; line-height: 1.6;">${item.model_name}</td>
                         <td>${item.capacity}</td>
                         <td class="price-hl">$${item.price}</td>
                     </tr>
                 `;
                 tableBody.innerHTML += row;
             });
+
+            // --- 📈 3. 繪製賽博龐克折線圖 ---
+            // 注意：API 資料是最新的在前面 (DESC)，但畫圖通常是「由舊到新」(左到右)，所以我們把陣列反轉一下
+            const chartData = [...result].reverse(); 
+            // 擷取日期 (為了省空間，可以只取 MM-DD，例如 2026-06-05 變成 06-05)
+            const labels = chartData.map(item => item.record_date.substring(5));
+            // 擷取價格
+            const prices = chartData.map(item => item.price);
+
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // 如果畫布上已經有舊圖了，先把它銷毀，確保畫面乾淨
+            if (priceChartInstance) {
+                priceChartInstance.destroy();
+            }
+
+            // 呼叫 Chart.js 開始畫圖
+            priceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'PRICE (NTD)',
+                        data: prices,
+                        borderColor: '#00f3ff',       // 螢光藍色線條
+                        backgroundColor: 'rgba(0, 243, 255, 0.1)', // 半透明漸層背景
+                        borderWidth: 2,
+                        pointBackgroundColor: '#bc13fe', // 節點用紫色點綴
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3 // 讓折線變成平滑的曲線
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }, // 隱藏圖例省空間
+                    scales: {
+                        x: {
+                            ticks: { color: '#e0e0e0', font: { family: 'Share Tech Mono' } },
+                            grid: { color: 'rgba(0, 243, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#00f3ff', font: { family: 'Share Tech Mono' } },
+                            grid: { color: 'rgba(0, 243, 255, 0.1)' },
+                            beginAtZero: false // 不從 0 開始，這樣能更明顯看出價格的微小波動
+                        }
+                    }
+                }
+            });
+
         })
         .catch(error => {
-            // 替換掉點點點，改成正確的錯誤印出指令
             console.error("抓取資料時發生錯誤：", error); 
         });
-} // 👈 這裡就是最關鍵的「關門」大括號！把 fetchPrices() 完美包起來。
+}
 
 window.onload = function() {
     initParticles(); animateParticles(); runLoader();
