@@ -4,7 +4,7 @@ on:
   schedule:
    
     - cron: '0 2 * * *'
-  # 允許你在 GitHub 網頁上手動點擊觸發測試
+  # 允許在 GitHub 網頁上手動點擊觸發測試
   workflow_dispatch:
 
 jobs:
